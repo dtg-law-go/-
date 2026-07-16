@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="동탄국제고 학생청원">
+  <title>동탄국제고 학생청원</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="logo">DTG</div><h1>동탄국제고 학생청원</h1></div>
+  <div class="top-actions">
+    <span id="userBadge" class="user-badge hidden"></span>
+    <button id="petitionOpenBtn" class="btn primary hidden">안건 발의하기</button>
+    <button id="archiveOpenBtn" class="btn light hidden">비공개 안건함</button>
+    <button id="authOpenBtn" class="btn light">로그인·가입</button>
+    <button id="logoutBtn" class="btn danger hidden">로그아웃</button>
+  </div>
+</header>
+
+<div id="topNotice" class="top-notice"></div>
+
+<main class="layout">
+  <aside class="sidebar">
+    <section id="adminNoticeCard" class="notice-card admin hidden">
+      <div class="notice-head"><h2>관리자 전용 공지</h2><button data-edit-notice="admin" class="btn mini hidden admin-control">수정</button></div>
+      <div id="adminNotice" class="notice-body"></div>
+    </section>
+    <section class="notice-card yellow">
+      <div class="notice-head"><h2>중요 공지</h2><button data-edit-notice="notice1" class="btn mini hidden admin-control">수정</button></div>
+      <div id="notice1" class="notice-body"></div>
+    </section>
+    <section class="notice-card">
+      <div class="notice-head"><h2>공지사항 2</h2><button data-edit-notice="notice2" class="btn mini hidden admin-control">수정</button></div>
+      <div id="notice2" class="notice-body"></div>
+    </section>
+    <section class="notice-card">
+      <div class="notice-head"><h2>공지사항 3</h2><button data-edit-notice="notice3" class="btn mini hidden admin-control">수정</button></div>
+      <div id="notice3" class="notice-body"></div>
+    </section>
+    <section class="notice-card">
+      <div class="notice-head"><h2>이용 안내</h2><button data-edit-notice="guide" class="btn mini hidden admin-control">수정</button></div>
+      <div id="guide" class="notice-body"></div>
+    </section>
+  </aside>
+
+  <section class="content">
+    <div class="toolbar">
+      <div><h2>학생 안건</h2><p id="countLabel">불러오는 중…</p></div>
+      <div class="filters">
+        <input id="searchInput" type="search" placeholder="제목 또는 내용 검색">
+        <select id="sortSelect">
+          <option value="newest">최신순</option>
+          <option value="oldest">오래된순</option>
+          <option value="recommend">추천순</option>
+        </select>
+      </div>
+    </div>
+    <div id="loading" class="state">안건을 불러오고 있습니다.</div>
+    <div id="empty" class="state hidden">게시된 안건이 없습니다.</div>
+    <div id="petitionGrid" class="petition-grid"></div>
+  </section>
+</main>
+
+<!-- Auth -->
+<div id="authModal" class="modal hidden"><div class="modal-card small">
+  <button class="x" data-close="authModal">×</button>
+  <h2>학생 계정</h2>
+  <div class="tabs">
+    <button id="loginTab" class="tab active">로그인</button>
+    <button id="signupTab" class="tab">가입</button>
+  </div>
+  <form id="loginForm">
+    <label>학교 이메일<input name="email" type="email" required placeholder="학번@dtg.hs.kr"></label>
+    <label>비밀번호<input name="password" type="password" minlength="8" required></label>
+    <button class="btn primary">로그인</button>
+  </form>
+  <form id="signupForm" class="hidden">
+    <label>학교 이메일<input name="email" type="email" required placeholder="학번@dtg.hs.kr"></label>
+    <label>비밀번호<input name="password" type="password" minlength="8" required></label>
+    <div class="form-grid">
+      <label>학번<input name="student_id" required maxlength="12"></label>
+      <label>이름<input name="name" required maxlength="30"></label>
+      <label>기수<input name="cohort" required maxlength="12" placeholder="예: 15기"></label>
+    </div>
+    <p class="help">가입 후 이메일 인증이 필요한 경우 학교 메일함에서 인증 링크를 눌러 주세요.</p>
+    <button class="btn primary">가입하기</button>
+  </form>
+</div></div>
+
+<!-- Petition create -->
+<div id="petitionModal" class="modal hidden"><div class="modal-card medium">
+  <button class="x" data-close="petitionModal">×</button>
+  <h2>안건 발의하기</h2>
+  <p class="help">로그인 계정의 학번·이름·기수가 발의자 정보로 안전하게 저장되며 일반 학생에게 공개되지 않습니다.</p>
+  <form id="petitionForm">
+    <label>제목<input name="title" maxlength="100" required></label>
+    <label>내용<textarea name="content" maxlength="5000" required></textarea></label>
+    <button class="btn primary">등록하기</button>
+  </form>
+</div></div>
+
+<!-- Detail -->
+<div id="detailModal" class="modal hidden"><div class="modal-card large">
+  <button class="x" data-close="detailModal">×</button>
+  <div id="detailContent"></div>
+</div></div>
+
+<!-- Recommend confirm -->
+<div id="recommendModal" class="modal hidden"><div class="modal-card small">
+  <button class="x" data-close="recommendModal">×</button>
+  <h2>추천 확인</h2>
+  <p>정말 이 안건을 추천하시겠습니까?</p>
+  <div class="info-box">추천으로 인한 불이익은 없습니다. 추천은 계정당 한 번만 가능하며 완료 후 되돌릴 수 없습니다.</div>
+  <input id="recommendPetitionId" type="hidden">
+  <button id="recommendConfirmBtn" class="btn primary">추천 확정</button>
+</div></div>
+
+<!-- People -->
+<div id="peopleModal" class="modal hidden"><div class="modal-card large">
+  <button class="x" data-close="peopleModal">×</button>
+  <h2>발의자 및 추천인 정보</h2>
+  <div id="peopleContent"></div>
+</div></div>
+
+<!-- Manage -->
+<div id="manageModal" class="modal hidden"><div class="modal-card medium">
+  <button class="x" data-close="manageModal">×</button>
+  <h2>상태·답변 관리</h2>
+  <form id="manageForm">
+    <input name="petition_id" type="hidden">
+    <label>상태<select name="status">
+      <option value="게시중">게시중</option>
+      <option value="검토대상">검토 대상</option>
+      <option value="검토중">검토 중</option>
+      <option value="반려됨">반려됨</option>
+      <option value="반영됨">반영됨</option>
+    </select></label>
+    <label>관리자 답변<textarea name="admin_reply" maxlength="3000"></textarea></label>
+    <button class="btn primary">저장</button>
+  </form>
+</div></div>
+
+<!-- Private confirm -->
+<div id="privateModal" class="modal hidden"><div class="modal-card small">
+  <button class="x" data-close="privateModal">×</button>
+  <h2>비공개 처리</h2>
+  <p>이 안건을 비공개 처리하시겠습니까? 일반 학생 화면에서 즉시 숨겨집니다.</p>
+  <input id="privatePetitionId" type="hidden">
+  <button id="privateConfirmBtn" class="btn danger">비공개 처리</button>
+</div></div>
+
+<!-- Archive -->
+<div id="archiveModal" class="modal hidden"><div class="modal-card large">
+  <button class="x" data-close="archiveModal">×</button>
+  <h2>비공개 안건함</h2>
+  <div id="archiveContent"></div>
+</div></div>
+
+<!-- Permanent delete -->
+<div id="deleteModal" class="modal hidden"><div class="modal-card small">
+  <button class="x" data-close="deleteModal">×</button>
+  <h2>영구 삭제</h2>
+  <p>정말 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.</p>
+  <input id="deletePetitionId" type="hidden">
+  <button id="deleteConfirmBtn" class="btn danger">삭제하기</button>
+</div></div>
+
+<!-- Notice edit -->
+<div id="noticeModal" class="modal hidden"><div class="modal-card medium">
+  <button class="x" data-close="noticeModal">×</button>
+  <h2>공지 수정</h2>
+  <form id="noticeForm">
+    <input name="notice_key" type="hidden">
+    <label>내용<textarea name="content" maxlength="3000" required></textarea></label>
+    <button class="btn primary">저장</button>
+  </form>
+</div></div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
